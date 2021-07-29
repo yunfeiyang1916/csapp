@@ -1,0 +1,18 @@
+{
+    "host": "47.114.99.127",
+    "username": "root",
+    "password": "StopFuckingAttack!",
+    "remotePath": "/var/work/src/github.com/yunfeiyang1916/csapp",
+    "protocol": "sftp",
+    "port": 22,
+    "fileNameEncoding": "utf8",
+    "autoUpload": false,
+    "autoDelete": false,
+    "autoDownload": false,
+    "ignore": [
+        ".git",
+        "/.vscode",
+        "\\.DS_Store",
+        "\\.exe"
+    ]
+}

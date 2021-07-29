@@ -1,0 +1,4 @@
+A   int,a<b
+B   int16,a>=b
+C   unsigned char,a<=b
+D   int64,a!=b

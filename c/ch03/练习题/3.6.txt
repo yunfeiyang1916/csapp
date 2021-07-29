@@ -1,0 +1,2 @@
+leaq    6(%ax),%rdx     6+x
+leaq    (%rax,%rcx)     x+y
