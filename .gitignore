@@ -5,6 +5,7 @@
 *.so
 *.o
 *.bin
+*.img
 *.dylib
 
 # Test binary, built with `go test -c`
