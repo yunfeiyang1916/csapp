@@ -1,0 +1,75 @@
+     1                                           ;代码清单16-2
+     2                                           ;文件名：c16.asm
+     3                                           ;文件说明：用户程序 
+     4                                  
+     5 00000000 [8EF80100]                       program_length   dd program_end          ;程序总长度#0x00
+     6 00000004 [5BF80100]                       entry_point      dd start                ;程序入口点#0x04
+     7 00000008 [10000000]                       salt_position    dd salt_begin           ;SALT表起始偏移量#0x08 
+     8 0000000C F8010000                         salt_items       dd (salt_end-salt_begin)/256 ;SALT条目数#0x0C
+     9                                  
+    10                                  ;-------------------------------------------------------------------------------
+    11                                  
+    12                                           ;符号地址检索表
+    13                                           salt_begin:                                     
+    14                                  
+    15 00000010 405072696E74537472-              PrintString      db  '@PrintString'
+    15 00000019 696E67             
+    16 0000001C 00<rep F4h>                                  times 256-($-PrintString) db 0
+    17                                                       
+    18 00000110 405465726D696E6174-              TerminateProgram db  '@TerminateProgram'
+    18 00000119 6550726F6772616D   
+    19 00000121 00<rep EFh>                                  times 256-($-TerminateProgram) db 0
+    20                                  ;-------------------------------------------------------------------------------
+    21                                  
+    22 00000210 00<rep 1F400h>                   reserved  times 256*500 db 0            ;保留一个空白区，以演示分页
+    23                                  
+    24                                  ;-------------------------------------------------------------------------------
+    25 0001F610 40526561644469736B-              ReadDiskData     db  '@ReadDiskData'
+    25 0001F619 44617461           
+    26 0001F61D 00<rep F3h>                                  times 256-($-ReadDiskData) db 0
+    27                                           
+    28 0001F710 405072696E7444776F-              PrintDwordAsHex  db  '@PrintDwordAsHexString'
+    28 0001F719 726441734865785374-
+    28 0001F722 72696E67           
+    29 0001F726 00<rep EAh>                                  times 256-($-PrintDwordAsHex) db 0
+    30                                           
+    31                                           salt_end:
+    32                                  
+    33 0001F810 0D0A                             message_0        db  0x0d,0x0a,
+    34 0001F812 20202E2E2E2E2E2E2E-                               db  '  ............User task is running with '
+    34 0001F81B 2E2E2E2E2E55736572-
+    34 0001F824 207461736B20697320-
+    34 0001F82D 72756E6E696E672077-
+    34 0001F836 69746820           
+    35 0001F83A 706167696E6720656E-                               db  'paging enabled!............',0x0d,0x0a,0
+    35 0001F843 61626C6564212E2E2E-
+    35 0001F84C 2E2E2E2E2E2E2E2E2E-
+    35 0001F855 0D0A00             
+    36                                  
+    37 0001F858 202000                           space            db  0x20,0x20,0
+    38                                           
+    39                                  ;-------------------------------------------------------------------------------
+    40                                        [bits 32]
+    41                                  ;-------------------------------------------------------------------------------
+    42                                  
+    43                                  start:
+    44                                            
+    45 0001F85B BB[10F80100]                     mov ebx,message_0
+    46 0001F860 FF1D[10000000]                   call far [PrintString]
+    47                                           
+    48 0001F866 31F6                             xor esi,esi
+    49 0001F868 B958000000                       mov ecx,88
+    50                                    .b1:
+    51 0001F86D BB[58F80100]                     mov ebx,space
+    52 0001F872 FF1D[10000000]                   call far [PrintString] 
+    53                                           
+    54 0001F878 8B14B500000000                   mov edx,[esi*4]
+    55 0001F87F FF1D[10F70100]                   call far [PrintDwordAsHex]
+    56                                           
+    57 0001F885 46                               inc esi
+    58 0001F886 E2E5                             loop .b1 
+    59                                          
+    60 0001F888 FF1D[10010000]                   call far [TerminateProgram]              ;退出，并将控制权返回到核心 
+    61                                      
+    62                                  ;-------------------------------------------------------------------------------
+    63                                  program_end:

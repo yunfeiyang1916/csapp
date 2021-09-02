@@ -627,11 +627,11 @@ load_relocate_program:                      ;加载并重定位用户程序
          mov esi,[ebp+11*4]                 ;从堆栈中取得TCB的基地址
   .b2:
          mov ebx,[es:esi+0x06]              ;取得可用的线性地址
-         add dword [es:esi+0x06],0x1000
-         call sys_routine_seg_sel:alloc_inst_a_page
+         add dword [es:esi+0x06],0x1000     ;虚拟空间先分配4k内存
+         call sys_routine_seg_sel:alloc_inst_a_page     ;在分配4k物理内存
 
          push ecx
-         mov ecx,8
+         mov ecx,8                          ;控制内循环，因为磁盘每次读取512字节，要想读取4k，则需要读取8次
   .b3:
          call sys_routine_seg_sel:read_hard_disk_0
          inc eax

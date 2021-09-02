@@ -1,0 +1,42 @@
+     1                                  ;硬盘主引导扇区代码
+     2                                  ;测试
+     3                                  
+     4                                  section code        ;代码段
+     5                                      start:
+     6 00000000 B8C007                          mov ax,0x7c0
+     7 00000003 8ED8                            mov ds,ax
+     8                                  
+     9 00000005 B8[0000]                        mov ax,start
+    10 00000008 B8[0000]                        mov ax,section.data.start
+    11 0000000B B8[0000]                        mov ax,section.header.start
+    12 0000000E A1[0000]                        mov ax,[program_length]
+    13 00000011 A1[0400]                        mov ax,[code_entry]    
+    14 00000014 A1[0600]                        mov ax,[code_entry+2]
+    15 00000017 A1[0A00]                        mov ax,[realloc_tbl_len]
+    16 0000001A A1[0C00]                        mov ax,[code_segment]
+    17 0000001D A1[1000]                        mov ax,[data_segment]
+    18 00000020 B8[1400]                        mov ax,program_end
+    19 00000023 EBFE                        jmp $
+    20                                  section data 
+    21                                      ;数据段
+    22 00000000 313233343536373839-         message db '1234567890'
+    22 00000009 30                 
+    23                                      data_end:
+    24                                  section header
+    25 00000000 [14000000]                  program_length dd program_end   ;[0x00]程序总长度，双字，32位
+    26                                      ;用户程序入口点
+    27 00000004 [0000]                      code_entry dw start             ;[0x04]偏移地址
+    28 00000006 [00000000]                             dd section.code.start;[0x06]段地址
+    29                                      
+    30 0000000A 0200                        realloc_tbl_len dw (header_end-realloc_begin)/4 ;段重定位表项个数[0x0a]
+    31                                      
+    32                                      realloc_begin:
+    33                                      ;段重定位表           
+    34 0000000C [00000000]                      code_segment    dd section.code.start   ;[0x0c]
+    35 00000010 [00000000]                      data_segment    dd section.data.start   ;[0x14]
+    36                                  
+    37                                      header_end:                      ;段结束标号 
+    38                                  
+    39                                      program_end:
+    40 00000014 00<rep 1B6h>                times 510-72      db  0;剩余的字节数用0填充，'$$'表示当前段的起始地址，'$-$$'正好是当前程序的字节大小
+    41 000001CA 55AA                                          db  0x55,0xaa;引导扇区结束标识

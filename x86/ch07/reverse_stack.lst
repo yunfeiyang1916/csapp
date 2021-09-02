@@ -1,0 +1,50 @@
+     1                                  ;硬盘主引导扇区代码
+     2                                  ;借用栈反转字符串
+     3                                  
+     4 00000000 EB06                    jmp start   ;跳过数据区
+     5                                  
+     6 00000002 616263646566            string db 'abcdef' ;声明一串字符串
+     7                                  
+     8                                  start:              ;代码段
+     9 00000008 B8C007                      mov ax,0x7c0    ;设置数据段基址
+    10 0000000B 8ED8                        mov ds,ax
+    11                                  
+    12 0000000D B800B8                      mov ax,0xb800       ;设置附加段基址，显卡地址
+    13 00000010 8EC0                        mov es,ax
+    14                                  
+    15 00000012 B90600                      mov cx,start-string    ;计数器，设置字符串字节数量
+    16 00000015 BB[0200]                    mov bx,string
+    17                                  lpush:
+    18 00000018 8A07                        mov al,[bx]
+    19 0000001A 50                          push ax     ;入栈
+    20 0000001B 43                          inc bx
+    21 0000001C E2FA                        loop lpush  ;先将cx值减一，如果cx的值不为0，则执行循环，否则向下继续执行
+    22                                  
+    23 0000001E B90600                      mov cx,start-string
+    24 00000021 BB[0200]                    mov bx,string
+    25                                  lpop:
+    26 00000024 58                          pop ax
+    27 00000025 8807                        mov [bx],al
+    28 00000027 43                          inc bx
+    29 00000028 E2FA                        loop lpop   ;先将cx值减一，如果cx的值不为0，则执行循环，否则向下继续执行
+    30                                  
+    31 0000002A B90600                      mov cx,start-string
+    32 0000002D BB[0200]                    mov bx,string
+    33 00000030 BF0000                      mov di,0
+    34                                  ;显示
+    35                                  show:
+    36 00000033 8A07                        mov al,[bx]
+    37 00000035 43                          inc bx
+    38 00000036 268805                      mov [es:di],al
+    39 00000039 47                          inc di
+    40 0000003A 26C60507                    mov byte [es:di],0x07    ;黑底白字
+    41 0000003E 47                          inc di
+    42 0000003F E2F2                        loop show   ;先将cx值减一，如果cx的值不为0，则执行循环，否则向下继续执行
+    43                                  
+    44 00000041 EBFE                        jmp $       ;无限循环
+    45                                  
+    46 00000043 00<rep 1BBh>            times 510-($-$$)  db  0 ;剩余的字节数用0填充，'$$'表示当前段的起始地址，'$-$$'正好是当前程序的字节大小
+    47 000001FE 55AA                                      db  0x55,0xaa ;引导扇区结束标识
+    48                                  
+    49                                  
+    50                                  

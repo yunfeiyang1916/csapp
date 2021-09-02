@@ -784,10 +784,10 @@ load_relocate_program:                      ;加载并重定位用户程序
 
          mov word [es:ecx+92],0             ;TSS中的GS=0
 
-         pushfd
-         pop edx
+         pushfd                             ;将EFLAGS压入栈中
+         pop edx                            ;将EFLAGS弹入edx
          
-         mov dword [es:ecx+36],edx          ;EFLAGS
+         mov dword [es:ecx+36],edx          ;登记EFLAGS
 
          ;在GDT中登记TSS描述符
          mov eax,[es:esi+0x14]              ;TSS的起始线性地址

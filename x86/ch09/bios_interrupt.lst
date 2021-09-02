@@ -1,0 +1,70 @@
+     1                                  ;用于演示BIOS中断的用户程序 
+     2                                  
+     3                                  section header vstart=0             ;用户程序头部段
+     4 00000000 [00000000]                  program_length dd program_end   ;[0x00]程序总长度，双字，32位
+     5                                      ;用户程序入口点
+     6 00000004 [0000]                      code_entry dw start             ;[0x04]偏移地址
+     7 00000006 [00000000]                             dd section.code.start;[0x06]段地址
+     8                                      
+     9 0000000A 0300                        realloc_tbl_len dw (header_end-realloc_begin)/4 ;段重定位表项个数[0x0a]
+    10                                      
+    11                                      realloc_begin:
+    12                                      ;段重定位表           
+    13 0000000C [00000000]                      code_segment    dd section.code.start   ;[0x0c]
+    14 00000010 [00000000]                      data_segment    dd section.data.start   ;[0x14]
+    15 00000014 [00000000]                      stack_segment   dd section.stack.start  ;[0x1c]
+    16                                  
+    17                                      header_end:                      ;段结束标号 
+    18                                  
+    19                                  section code align=16 vstart=0      ;代码段，16字节对齐
+    20                                  ;----------------------程序入口--------------------------------------------------------- 
+    21                                      start:
+    22                                           ;初始执行时，ds、es均指向头部段
+    23 00000000 A1[1400]                        mov ax,[stack_segment]      ;设置用户程序自己的栈段
+    24 00000003 8ED0                            mov ss,ax
+    25 00000005 BC[0001]                        mov sp,ss_pointer           ;初始化栈指针，执行栈最大地址，栈是从高地址向低地址增长的
+    26                                  
+    27 00000008 A1[1000]                        mov ax,[data_segment]       ;设置用户程序自己的数据段
+    28 0000000B 8ED8                            mov ds,ax
+    29                                  
+    30 0000000D B97700                          mov cx,msg_end-message      ;文本长度
+    31 00000010 BB[0000]                        mov bx,message
+    32                                      .putc:
+    33 00000013 B40E                            mov ah,0x0e                 ;ah用于指定同设备的不同功能，在这里0x0e表示在屏幕上写入一个字符，并推进光标位置
+    34 00000015 8A07                            mov al,[bx]                 ;al用于读取或写入设备执行的结果
+    35 00000017 CD10                            int 0x10                    ;0x10表示显示器中断
+    36 00000019 43                              inc bx
+    37 0000001A E2F7                            loop .putc                  ;先将cx值减一，如果cx的值不为0，则执行循环，否则向下继续执行
+    38                                      .reps:
+    39 0000001C B400                            mov ah,0x00                 ;0x00表示从键盘读取字符功能
+    40 0000001E CD16                            int 0x16                    ;键盘中断，结果放到al中
+    41                                  
+    42 00000020 B40E                            mov ah,0x0e                 ;显示到显示器
+    43 00000022 B307                            mov bl,0x07
+    44 00000024 CD10                            int 0x10
+    45 00000026 EBF4                            jmp .reps
+    46                                  
+    47                                  
+    48                                  section data align=16 vstart=0      ;数据段，16字节对齐
+    49 00000000 48656C6C6F2C206672-         message       db 'Hello, friend!',0x0d,0x0a
+    49 00000009 69656E64210D0A     
+    50 00000010 546869732073696D70-                       db 'This simple procedure used to demonstrate '
+    50 00000019 6C652070726F636564-
+    50 00000022 757265207573656420-
+    50 0000002B 746F2064656D6F6E73-
+    50 00000034 747261746520       
+    51 0000003A 7468652042494F5320-                       db 'the BIOS interrupt.',0x0d,0x0a
+    51 00000043 696E74657272757074-
+    51 0000004C 2E0D0A             
+    52 0000004F 506C65617365207072-                       db 'Please press the keys on the keyboard ->'
+    52 00000058 65737320746865206B-
+    52 00000061 657973206F6E207468-
+    52 0000006A 65206B6579626F6172-
+    52 00000073 64202D3E           
+    53                                      msg_end:
+    54                                  section stack align=16 vstart=0     ;栈段，16字节对齐
+    55 00000000 <res 100h>                  resb 256                        ;保留256字节栈空间，但不初始化它们的值
+    55          ******************       warning: uninitialized space declared in stack section: zeroing [-w+zeroing]
+    56                                      ss_pointer:                      ;栈段结束标号，偏移量为256
+    57                                  section trail align=16
+    58                                      program_end:                    ;程序结尾标号，因为段没有定义vstart,所以该标号的偏移地址是从程序头开始的

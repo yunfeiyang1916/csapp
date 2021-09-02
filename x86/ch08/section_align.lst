@@ -1,0 +1,7 @@
+     1                                  ;段对齐示例
+     2                                  section data1 align=16
+     3 00000000 55                          db 0x55
+     4                                  section data2 align=16
+     5 00000000 AA                          db 0xaa
+     6                                  section data3 align=16
+     7 00000000 99                          db 0x99

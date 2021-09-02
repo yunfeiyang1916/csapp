@@ -1,0 +1,44 @@
+     1                                  ;硬盘主引导扇区代码
+     2                                  ;交换参数，反转字符串
+     3                                  
+     4 00000000 EB06                    jmp start   ;跳过数据区
+     5                                  
+     6 00000002 616263646566            string db 'abcdef'
+     7                                  
+     8                                  start:
+     9 00000008 B8C007                      mov ax,0x7c0
+    10 0000000B 8ED8                        mov ds,ax
+    11                                  
+    12 0000000D B800B8                      mov ax,0xb800
+    13 00000010 8EC0                        mov es,ax
+    14                                  
+    15 00000012 BB[0200]                    mov bx,string
+    16 00000015 BE0000                      mov si,0
+    17 00000018 BF0600                      mov di,start-string
+    18                                  
+    19                                  swap:
+    20 0000001B 8A20                        mov ah,[bx+si]
+    21 0000001D 8A01                        mov al,[bx+di]
+    22 0000001F 8800                        mov [bx+si],al  ;交换
+    23 00000021 8821                        mov [bx+di],ah
+    24 00000023 46                          inc si
+    25 00000024 4F                          dec di
+    26 00000025 39FE                        cmp si,di
+    27 00000027 7CF2                        jl swap     ;首尾没有相遇，继续循环
+    28                                  
+    29 00000029 B90600                      mov cx,start-string
+    30 0000002C BF0000                      mov di,0
+    31                                  show:
+    32 0000002F 8A07                        mov al,[bx]
+    33 00000031 43                          inc bx
+    34 00000032 268805                      mov [es:di],al
+    35 00000035 47                          inc di
+    36 00000036 26C60507                    mov byte [es:di],0x07
+    37 0000003A 47                          inc di
+    38 0000003B E2F2                        loop show
+    39                                  
+    40 0000003D EBFE                    jmp $
+    41                                  
+    42 0000003F 00<rep 1BFh>            times 510-($-$$)  db  0 ;剩余的字节数用0填充，'$$'表示当前段的起始地址，'$-$$'正好是当前程序的字节大小
+    43 000001FE 55AA                                      db  0x55,0xaa ;引导扇区结束标识
+    44                                  

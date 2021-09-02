@@ -115,6 +115,7 @@ put_char:                                ;ÏÔÊ¾Ò»¸ö×Ö·û
          mov dx,0x3d5
          mov al,bh
          out dx,al
+         
          mov dx,0x3d4
          mov al,0x0f
          out dx,al
