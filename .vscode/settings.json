@@ -1,3 +1,13 @@
 {
-    "files.autoGuessEncoding": true
+    "files.autoGuessEncoding": true,
+    "files.associations": {
+        "io.h": "c",
+        "stddef.h": "c",
+        "unistd.h": "c",
+        "types.h": "c",
+        "fs.h": "c",
+        "head.h": "c",
+        "errno.h": "c",
+        "sched.h": "c"
+    }
 }

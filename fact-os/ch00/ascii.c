@@ -1,0 +1,1 @@
+char *ptr = "abc\n";
